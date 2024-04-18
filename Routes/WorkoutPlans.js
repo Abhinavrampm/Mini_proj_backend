@@ -72,15 +72,36 @@ router.put('/workouts/:id',  async (req, res) => {
     }
 });
 
-router.delete('/workouts/:id',  async (req, res) => {
+// router.delete('/workouts/:id', async (req, res) => {
+//     try {
+//         const workout = await Workout.findById(req.params.id);
+//         if (!workout) {
+//             return res.json(createResponse(false, 'Workout not found'));
+//         }
+//         await workout.remove();
+//         res.json(createResponse(true, 'Workout deleted successfully'));
+//     } catch (err) {
+//         res.json(createResponse(false, err.message));
+//     }
+// });
+
+router.delete('/workouts/:id', async (req, res) => {
     try {
-        const workout = await Workout.findById(req.params.id);
-        await workout.remove();
-        res.json(createResponse(true, 'Workout deleted successfully'));
+      const workoutId = req.params.id;
+      console.log('Deleting workout with ID:', workoutId);
+      const workout = await Workout.findById(workoutId);
+      if (!workout) {
+        return res.json(createResponse(false, 'Workout not found'));
+      }
+      await Workout.deleteOne({ _id: workoutId }); // Use deleteOne() instead of workout.remove()
+      console.log('Workout deleted successfully:', workoutId);
+      res.json(createResponse(true, 'Workout deleted successfully'));
     } catch (err) {
-        res.json(createResponse(false, err.message));
+      console.error('Error deleting workout:', err);
+      res.json(createResponse(false, err.message));
     }
-});
+  });
+  
 
 
 
