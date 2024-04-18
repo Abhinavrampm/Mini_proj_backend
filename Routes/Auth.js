@@ -22,6 +22,52 @@ function createResponse(ok, message, data) {
     };
 }
 
+router.get('/profile', authTokenHandler, async (req, res, next) => {
+    try {
+      const userId = req.userId; // Get user ID from auth token
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json(createResponse(false, 'User not found'));
+      }
+      // Extract only necessary fields for the profile
+      const { name, dob, weight, goal, activityLevel } = user;
+      res.status(200).json(createResponse(true, 'User profile fetched successfully', {
+        name,
+        dob,
+        weight,
+        goal,
+        activityLevel
+      }));
+    } catch (err) {
+      next(err);
+    }
+  });
+  
+  router.put('/profile', authTokenHandler, async (req, res, next) => {
+    try {
+      const userId = req.userId; // Get user ID from auth token
+      const { weightInKg, goal, activityLevel } = req.body;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json(createResponse(false, 'User not found'));
+      }
+      // Update only specified fields
+      if (weightInKg) {
+        user.weight = [{ weight: weightInKg, unit: 'kg', date: Date.now() }];
+      }
+      if (goal) {
+        user.goal = goal;
+      }
+      if (activityLevel) {
+        user.activityLevel = activityLevel;
+      }
+      await user.save();
+      res.status(200).json(createResponse(true, 'User profile updated successfully'));
+    } catch (err) {
+      next(err);
+    }
+  });
+  
 router.post('/register', async (req, res, next) => {
     console.log(req.body);
     try {
